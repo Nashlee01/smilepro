@@ -1,16 +1,91 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('layouts.app')
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+@section('content')
+<div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <!-- Hero Section -->
+    <div class="container mx-auto px-4 py-16 md:py-24">
+        <div class="text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Welkom bij SmilePro</h1>
+            <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">Uw complete oplossing voor efficiënte tandartspraktijkbeheer</p>
+            
+            @guest
+                <div class="space-x-4">
+                    <a href="{{ route('login') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-200">
+                        Inloggen
+                    </a>
+                    <a href="#features" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-3 px-8 border border-gray-300 rounded-lg shadow-sm transition duration-200">
+                        Meer informatie
+                    </a>
+                </div>
+            @else
+                <div class="space-x-4">
+                    <p class="text-lg text-gray-700 mb-4">Welkom terug, <span class="font-semibold">{{ Auth::user()->name }}</span>!</p>
+                    @if(Auth::user()->role === 'practicemanager')
+                        <a href="{{ route('employees.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-200">
+                            Beheer Medewerkers
+                        </a>
+                    @endif
+                </div>
+            @endguest
+        </div>
+    </div>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+    <!-- Features Section -->
+    <div id="features" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Onze Kenmerken</h2>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div class="text-blue-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Medewerkersbeheer</h3>
+                    <p class="text-gray-600">Eenvoudig beheer van al uw medewerkers en hun planningen op één centrale locatie.</p>
+                </div>
 
-        <!-- Styles / Scripts -->
+                <!-- Feature 2 -->
+                <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div class="text-blue-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Afsprakenplanning</h3>
+                    <p class="text-gray-600">Efficiënte planning en beheer van patiëntafspraken met automatische herinneringen.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div class="text-blue-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Rapportage</h3>
+                    <p class="text-gray-600">Gedetailleerde rapporten en inzichten om uw praktijkprestaties te verbeteren.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    @guest
+    <div class="py-16 bg-blue-600 text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-6">Klaar om te beginnen?</h2>
+            <p class="text-xl mb-8 max-w-2xl mx-auto">Meld u aan en ontdek hoe SmilePro uw tandartspraktijk kan transformeren.</p>
+            <a href="{{ route('login') }}" class="bg-white text-blue-600 hover:bg-gray-100 font-semibold py-3 px-8 rounded-lg transition duration-200 inline-block">
+                Nu Inloggen
+            </a>
+        </div>
+    </div>
+    @endguest
+</div>
+@endsection
         @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
             @vite(['resources/css/app.css', 'resources/js/app.js'])
         @else
