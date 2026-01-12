@@ -6,21 +6,31 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class EmployeeController extends Controller
 {
+    private function authorizePracticeManager(): void
+    {
+        if (!Auth::check()) {
+            abort(403);
+        }
+        if (Auth::user()->role !== 'practicemanager') {
+            abort(403, 'Unauthorized action.');
+        }
+    }
+
     public function index()
     {
+        // AuthN + AuthZ outside try so 403 isn't swallowed
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+        if (Auth::user()->role !== 'practicemanager') {
+            abort(403, 'Unauthorized action.');
+        }
         try {
-            // Redirect to login if not authenticated
-            if (!Auth::check()) {
-                return redirect()->route('login');
-            }
-
-            // Only allow practicemanagers to view the employee list
-            if (Auth::user()->role !== 'practicemanager') {
-                abort(403, 'Unauthorized action.');
-            }
 
             // Get all users except practice managers using JOIN with employee_availabilities
             $employees = User::select('users.*')
@@ -43,6 +53,84 @@ class EmployeeController extends Controller
             \Log::error('Error in EmployeeController@index: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Er is een fout opgetreden bij het ophalen van de medewerkersgegevens.');
         }
+    }
+
+    public function create()
+    {
+        $this->authorizePracticeManager();
+        return view('employees.create');
+    }
+
+    public function store(Request $request)
+    {
+        $this->authorizePracticeManager();
+
+        $validated = $request->validate([
+            'name'  => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'role'  => ['required', 'in:dentist,assistant'],
+            'status'=> ['nullable', 'in:active,inactive'],
+            'active'=> ['nullable', 'boolean'], // backward compatibility with existing views
+        ]);
+
+        $status = $validated['status'] ?? (($request->boolean('active')) ? 'active' : 'inactive');
+
+        // Generate a temporary password; hashing handled by cast
+        $tempPassword = Str::random(12);
+
+        User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'status' => $status,
+            'password' => $tempPassword,
+        ]);
+
+        return redirect()->route('employees.index')
+            ->with('success', 'Medewerker aangemaakt. Vraag de gebruiker om het wachtwoord te resetten.');
+    }
+
+    public function edit(User $employee)
+    {
+        $this->authorizePracticeManager();
+        return view('employees.edit', compact('employee'));
+    }
+
+    public function update(Request $request, User $employee)
+    {
+        $this->authorizePracticeManager();
+
+        $validated = $request->validate([
+            'name'  => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $employee->id],
+            'role'  => ['required', 'in:dentist,assistant'],
+            'status'=> ['nullable', 'in:active,inactive'],
+            'active'=> ['nullable', 'boolean'],
+        ]);
+
+        $status = $validated['status'] ?? (($request->boolean('active')) ? 'active' : 'inactive');
+
+        $employee->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'status' => $status,
+        ]);
+
+        return redirect()->route('employees.index')->with('success', 'Medewerker bijgewerkt.');
+    }
+
+    public function destroy(User $employee)
+    {
+        $this->authorizePracticeManager();
+
+        // Prevent deleting practice managers by route-model binding misuse
+        if ($employee->role === 'practicemanager') {
+            return redirect()->route('employees.index')->with('error', 'Practicemanagers kunnen niet verwijderd worden.');
+        }
+
+        $employee->delete();
+        return redirect()->route('employees.index')->with('success', 'Medewerker verwijderd.');
     }
 
     /**

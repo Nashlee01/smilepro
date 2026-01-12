@@ -55,7 +55,17 @@
                         @if(auth()->user()->role === 'practicemanager')
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->is('employees*') ? 'active' : '' }}" href="{{ route('employees.index') }}">
-                                    Overzicht Medewerkers
+                                    Medewerkers
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->is('accounts*') ? 'active' : '' }}" href="{{ route('accounts.index') }}">
+                                    Accounts
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->is('appointments*') ? 'active' : '' }}" href="{{ route('appointments.index') }}">
+                                    Afspraken
                                 </a>
                             </li>
                         @endif
@@ -91,8 +101,26 @@
 
     <main class="container">
         @if(session('success'))
-            <div class="alert alert-success">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
                 {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        @if($errors->any())
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong>Er ging iets mis:</strong>
+                <ul class="mb-0">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
@@ -101,6 +129,20 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-dismiss alerts after a short delay
+        document.addEventListener('DOMContentLoaded', () => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach((el) => {
+                setTimeout(() => {
+                    try {
+                        const bsAlert = bootstrap.Alert.getOrCreateInstance(el);
+                        bsAlert.close();
+                    } catch (e) { el.remove(); }
+                }, 4000);
+            });
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>

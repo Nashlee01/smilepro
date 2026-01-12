@@ -7,6 +7,10 @@ class CreateGetEmployeeAvailabilityProcedure extends Migration
 {
     public function up()
     {
+        // SQLite (used in tests) doesn't support stored procedures; skip in that case
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
         $procedure = "
         CREATE PROCEDURE GetEmployeeAvailability(IN employeeId INT, IN checkDate DATE)
         BEGIN
@@ -32,6 +36,9 @@ class CreateGetEmployeeAvailabilityProcedure extends Migration
 
     public function down()
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
         DB::unprepared("DROP PROCEDURE IF EXISTS GetEmployeeAvailability");
     }
 }
