@@ -5,7 +5,10 @@
     <div class="col">
         <h1>Medewerkersoverzicht</h1>
     </div>
-</div>
+    <div class="col-auto">
+        <a href="{{ route('employees.create') }}" class="btn btn-primary">Nieuwe medewerker</a>
+    </div>
+    </div>
 
 <div class="card">
     <div class="card-body">
@@ -22,6 +25,7 @@
                             <th>E-mail</th>
                             <th>Rol</th>
                             <th>Status</th>
+                            <th class="text-end">Acties</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -34,6 +38,14 @@
                                     <span class="status-{{ $employee->status }}">
                                         {{ $employee->status === 'active' ? 'Actief' : 'Inactief' }}
                                     </span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="{{ route('employees.edit', $employee) }}" class="btn btn-sm btn-outline-secondary">Bewerken</a>
+                                    <form action="{{ route('employees.destroy', $employee) }}" method="POST" class="d-inline" onsubmit="return confirm('Weet je zeker dat je deze medewerker wilt verwijderen?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-sm btn-outline-danger">Verwijderen</button>
+                                    </form>
                                 </td>
                             </tr>
                         @endforeach
