@@ -55,7 +55,7 @@ class EmployeeController extends Controller
                 $date = now()->format('Y-m-d');
             }
 
-            // Using the stored procedure
+            // stored procedure
             $results = DB::select(
                 'CALL GetEmployeeAvailability(?, ?)', 
                 [$employeeId, $date]
